@@ -1,0 +1,46 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Leer Repositorio API",
+    "version": "1.0.0",
+    "description": "API para analizar repositorios GitHub"
+  },
+  "paths": {
+    "/leer-repositorio": {
+      "post": {
+        "summary": "Analiza un repositorio GitHub y extrae información técnica",
+        "description": "Lee y analiza un repositorio GitHub para extraer stack tecnológico, arquitectura, componentes, dependencias y riesgos técnicos",
+        "operationId": "leerRepositorio",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "repo_url": {
+                    "type": "string",
+                    "description": "URL completa del repositorio GitHub a analizar (ejemplo: https://github.com/owner/repo)"
+                  }
+                },
+                "required": ["repo_url"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Análisis exitoso del repositorio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

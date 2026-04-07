@@ -1,0 +1,76 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: PoC Code Analyzer - Multi-Agent Bedrock Architecture
+
+Parameters:
+  SupervisorAgentId:
+    Type: String
+    Description: Bedrock Supervisor Agent ID
+  SupervisorAgentAliasId:
+    Type: String
+    Description: Bedrock Supervisor Agent Alias ID
+  S3BucketName:
+    Type: String
+    Default: poc-code-analyzer-2026
+    Description: S3 bucket for generated documents
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 300
+    MemorySize: 512
+
+Resources:
+  InvokeSupervisorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: invoke-supervisor-agent
+      CodeUri: .
+      Handler: invoke-supervisor-agent.lambda_handler
+      Environment:
+        Variables:
+          SUPERVISOR_AGENT_ID: !Ref SupervisorAgentId
+          SUPERVISOR_AGENT_ALIAS_ID: !Ref SupervisorAgentAliasId
+      Policies:
+        - Statement:
+          - Effect: Allow
+            Action: bedrock:InvokeAgent
+            Resource: !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:agent-alias/*/*'
+
+  BedrockAsisFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bedrock-asis-lambda
+      CodeUri: .
+      Handler: bedrock-asis-lambda.lambda_handler
+      Environment:
+        Variables:
+          S3_BUCKET: !Ref S3BucketName
+      Policies:
+        - Statement:
+          - Effect: Allow
+            Action: s3:PutObject
+            Resource: !Sub 'arn:aws:s3:::${S3BucketName}/documentos-generados/*'
+
+  BedrockTobeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bedrock-tobe-lambda
+      CodeUri: .
+      Handler: bedrock-tobe-lambda.lambda_handler
+      Environment:
+        Variables:
+          S3_BUCKET: !Ref S3BucketName
+      Policies:
+        - Statement:
+          - Effect: Allow
+            Action: s3:PutObject
+            Resource: !Sub 'arn:aws:s3:::${S3BucketName}/documentos-generados/*'
+
+Outputs:
+  InvokeSupervisorFunctionArn:
+    Value: !GetAtt InvokeSupervisorFunction.Arn
+  BedrockAsisFunctionArn:
+    Value: !GetAtt BedrockAsisFunction.Arn
+  BedrockTobeFunctionArn:
+    Value: !GetAtt BedrockTobeFunction.Arn

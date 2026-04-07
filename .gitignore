@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+*.pyc
+*.zip
+.DS_Store
+output*.json
+response*.json
+test-*.json
+*.docx
